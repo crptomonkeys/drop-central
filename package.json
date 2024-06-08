@@ -1,0 +1,37 @@
+{
+  "name": "cm-drops-api",
+  "version": "0.0.1",
+  "description": "service to drop nfts to the cryptomonkeys community",
+  "author": "green",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src/**/*.ts* --fix",
+    "prettier": "prettier ./**/*.ts* --config .prettierrc.json --write",
+    "dev": "tsx api.ts",
+    "build": "tsc api.ts",
+    "start": "tsx api.ts",
+    "type-check": "tsc"
+  },
+  "dependencies": {
+    "@sequelize/core": "7.0.0-alpha.37",
+    "axios": "^1.7.2",
+    "eosjs": "22.1.0",
+    "express": "4.19.2",
+    "node-fetch": "3.3.2",
+    "pg": "^8.11.5",
+    "reflect-metadata": "0.2.2",
+    "typeorm": "0.3.20"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.10.5",
+    "typescript": "^4.3.2"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  }
+}

@@ -1,0 +1,4 @@
+node_modules
+db
+allowedApplications.json
+package-lock.json

@@ -1,0 +1,48 @@
+{
+    "compilerOptions": {
+      /* Base Options */
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "ES2022",
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "isolatedModules": true,
+      /* Sequelize */
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      /* Strictness */
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "forceConsistentCasingInFileNames": true,
+      "checkJs": true,
+      /* Bundled projects */
+      "lib": ["dom", "dom.iterable", "ES2022"],
+      "noEmit": true,
+      "module": "ESNext",
+      "moduleResolution": "node",
+      "jsx": "preserve",
+      "plugins": [{ "name": "next" }],
+      "incremental": true,
+      /* Path aliases */
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./*"]
+      },
+      /* Needed for ts-node */
+      "typeRoots": ["**/*.d.ts"]
+    },
+    "include": [
+      ".eslintrc.cjs",
+      "next-env.d.ts",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.cjs",
+      "**/*.js",
+      ".next/types/**/*.ts"
+    ],
+    "exclude": ["node_modules"],
+    "ts-node": {
+      "esm": true
+    }
+  }
