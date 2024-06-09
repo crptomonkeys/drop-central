@@ -265,13 +265,13 @@ app.delete('/transfer/:id', async (req: Request, res: Response) => {
 
   try {
     const transferRepository = AppDataSource.getRepository(Transfer);
-    const transfer = await transferRepository.findOneBy({ id: transferId, application: application.name  });
+    const transfer = await transferRepository.findOneBy({ id: transferId, application: application.name, status: "Pending"  });
     if (!transfer) {
       return res.status(404).json({ error: 'Transfer not found' });
     }
 
     const result = await transferRepository.delete({ id: transferId, application: application.name });
-    res.status(400).json({ success: 'True', id: transferId })
+    res.status(200).json({ success: 'True', id: transferId })
   } catch (error) {
     console.error('Error deleting transfer:', error);
     res.status(500).json({ error: 'Internal Server Error' });
