@@ -1,22 +1,22 @@
 import 'reflect-metadata';
 import express, { Request, Response } from 'express';
 import { DataSource, LessThan, MoreThan } from 'typeorm';
-import { Api, JsonRpc } from 'eosjs';
 import fetch from 'node-fetch';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 import { AssetStore } from './util/atomicassetsStore';
-import { TransactResult } from 'eosjs/dist/eosjs-api-interfaces';
+import { Session } from '@wharfkit/session';
+import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 
 const app = express();
 app.use(bodyParser.json());
 
-const DROP_WALLET_PK = ["needs to be loaded from file or env in prod"]
-const DROP_WALLET_NAME = 'plchldr'
+const DROP_WALLET_PK = "needs to be loaded from file or env in prod";
+const DROP_WALLET_NAME = 'plchldr';
+const DROP_WALLET_PERM = 'claimlink';
 
 @Entity()
 class Transfer {
@@ -81,16 +81,28 @@ const allowedApplications: AllowedApplication[] = JSON.parse(
 );
 
 const allowedApplicationsMap: Record<string, AllowedApplication> = {};
-    allowedApplications.forEach(app => {
+allowedApplications.forEach(app => {
     allowedApplicationsMap[app.name] = app;
 });
 
 const allowedApplicationsAuthMap: string[] = [];
-    allowedApplications.forEach(app => {
-        allowedApplicationsAuthMap.push(app.privateKey);
+allowedApplications.forEach(app => {
+    allowedApplicationsAuthMap.push(app.privateKey);
 });
 
-const rpc = new JsonRpc('https://wax.greymass.com/', { fetch });
+const chain = {
+  id: "1064487b3cd1a897ce03ae5b6a865651747e2e152090f99c1d19d44e01aea5a4",
+  url: "https://wax.greymass.com/",
+}
+
+const walletPlugin = new WalletPluginPrivateKey(DROP_WALLET_PK)
+
+const session = new Session({
+  actor: DROP_WALLET_NAME,
+  permission: DROP_WALLET_PERM,
+  chain,
+  walletPlugin,
+})
 
 const processTransfersInBackground = async () => {
   const transferRepository = AppDataSource.getRepository(Transfer);
@@ -133,10 +145,7 @@ const processTransfersInBackground = async () => {
         actions.push({
             account: 'atomicassets',
             name: 'transfer',
-            authorization: [{
-              actor: DROP_WALLET_NAME,
-              permission: 'claimlink',
-            }],
+            authorization: [session.permissionLevel],
             data: {
               from: DROP_WALLET_NAME,
               to: receiver,
@@ -147,21 +156,17 @@ const processTransfersInBackground = async () => {
       }
 
       if (actions.length){
-        const mappedAssetIds = actions.map((action) => {return action.data.asset_ids[0]})
-        const api = new Api({ rpc, signatureProvider: new JsSignatureProvider(DROP_WALLET_PK) });
+        const mappedAssetIds = actions.map((action) => { return action.data.asset_ids[0]; });
+
         try {
-            const pushResult  = await api.transact({actions:actions}, {
-            blocksBehind: 3,
-            expireSeconds: 30,
-            }) as TransactResult;
+            const pushResult  = await session.transact({ actions: actions });
 
             await Promise.all(pendingTransfers.map(async (transfer) => {
               if (mappedAssetIds.includes(transfer.assetId)) {
                 transfer.status = 'Completed';
-                transfer.chainTxId = pushResult.transaction_id ? pushResult.transaction_id : "123FAIL";
+                transfer.chainTxId = pushResult.response?.transaction_id ? pushResult.response?.transaction_id : "123FAIL";
                 await transferRepository.save(transfer);
               }
-                
             }));
         } catch (error) {
             console.error('Error processing transfer:', error);
@@ -186,13 +191,13 @@ app.post('/transfer', async (req: Request, res: Response) => {
   }
 
   if (!allowedApplicationsAuthMap.includes(authHeader)) {
-      console.log('unauthorized request:', req.body)
+      console.log('unauthorized request:', req.body);
       return res.status(403).json({ error: 'Unauthorized application' });
   }
 
-  const transfers = req.body;
+  const transfers = req.body as Transfer[];
 
-  const application = allowedApplications.filter(app => app.privateKey === req.headers['authorization'])[0] 
+  const application = allowedApplications.filter(app => app.privateKey === req.headers['authorization'])[0];
 
   if (!application){
     return res.status(400).json({ error: 'Not authed or authed for wrong application' });
@@ -204,16 +209,24 @@ app.post('/transfer', async (req: Request, res: Response) => {
 
   const transferRepository = AppDataSource.getRepository(Transfer);
   let currentDate = new Date();
-  const targetTime = new Date(currentDate.setHours(currentDate.getHours() - 24)).toISOString()
-  const transferCount = await transferRepository.findAndCountBy({ application: application.name, time:  MoreThan(targetTime)})
+  const targetTime = new Date(currentDate.setHours(currentDate.getHours() - 24)).toISOString();
+  const transferCount = await transferRepository.findAndCountBy({ application: application.name, time:  MoreThan(targetTime)});
   //@ts-ignore
   if (transferCount[1] + transfers.length > allowedApplicationsMap[application.name].maxDropCount) {
     console.error('Transfer limit reached for application:', application);
     return res.status(429).json({ error: 'Daily Drop limit for your application has been reached. Please wait 24hrs an try again.' });
   }
 
+  const validWAX = new RegExp('(^[a-z1-5.]{0,11}[a-z1-5]$)|(^[a-z1-5.]{12}[a-j1-5]$)');
+
+  const filteredTransfers = transfers.filter(transfer => {
+    if (typeof transfer.receiver !== 'string') return false;
+    if (!validWAX.test(transfer.receiver)) return false;
+    return true;
+  });
+
   try {    
-    const savedTransfers = await transferRepository.save(transfers.map((transfer: any) => ({
+    const savedTransfers = await transferRepository.save(filteredTransfers.map((transfer: any) => ({
       sender: DROP_WALLET_NAME,
       assetId: "",
       receiver: transfer.receiver,

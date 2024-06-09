@@ -11,12 +11,14 @@
     "dev": "tsx api.ts",
     "build": "tsc api.ts",
     "start": "tsx api.ts",
+    "wipe": "tsx util/db-wipe.ts",
     "type-check": "tsc"
   },
   "dependencies": {
     "@sequelize/core": "7.0.0-alpha.37",
+    "@wharfkit/session": "^1.3.1",
+    "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
     "axios": "^1.7.2",
-    "eosjs": "22.1.0",
     "express": "4.19.2",
     "node-fetch": "3.3.2",
     "pg": "^8.11.5",
