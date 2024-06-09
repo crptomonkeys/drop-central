@@ -1,22 +1,20 @@
 import 'reflect-metadata';
 import express, { Request, Response } from 'express';
-import { DataSource, LessThan, MoreThan } from 'typeorm';
-import fetch from 'node-fetch';
+import { DataSource, MoreThan } from 'typeorm';
 import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
+import dotenv from 'dotenv'; 
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { AssetStore } from './util/atomicassetsStore';
 import { Session } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 
+dotenv.config();
+
 const app = express();
 app.use(bodyParser.json());
-
-const DROP_WALLET_PK = "needs to be loaded from file or env in prod";
-const DROP_WALLET_NAME = 'plchldr';
-const DROP_WALLET_PERM = 'claimlink';
 
 @Entity()
 class Transfer {
@@ -74,7 +72,7 @@ AppDataSource.initialize()
   })
   .catch(err => console.error('Error initializing database:', err));
 
-const assetStore = new AssetStore(DROP_WALLET_NAME, 'https://aa.wax.blacklusion.io');
+const assetStore = new AssetStore(process.env.DROP_WALLET_NAME as string, ['https://aa.wax.blacklusion.io', 'https://atomic3.hivebp.io', 'https://atomic2.hivebp.io', 'https://aa.neftyblocks.com', 'https://aa-wax-public1.neftyblocks.com', 'https://aa.dapplica.io', 'https://api.atomic.greeneosio.com', 'https://wax-atomic-api.eosphere.io', 'https://wax-aa.eosdac.io', 'https://atomic.hivebp.io', 'https://atomic.3dkrender.com', 'https://wax.eosusa.io', 'https://atomic-wax-mainnet.wecan.dev', 'https://wax-atomic.eosiomadrid.io', 'https://wax.api.atomicassets.io', 'https://atomicassets.ledgerwise.io']);
         
 const allowedApplications: AllowedApplication[] = JSON.parse(
     fs.readFileSync(path.resolve(__dirname, 'allowedApplications.json'), 'utf8')    
@@ -95,11 +93,11 @@ const chain = {
   url: "https://wax.greymass.com/",
 }
 
-const walletPlugin = new WalletPluginPrivateKey(DROP_WALLET_PK)
+const walletPlugin = new WalletPluginPrivateKey(process.env.DROP_WALLET_PK as string)
 
 const session = new Session({
-  actor: DROP_WALLET_NAME,
-  permission: DROP_WALLET_PERM,
+  actor: process.env.DROP_WALLET_NAME,
+  permission: process.env.DROP_WALLET_PERM,
   chain,
   walletPlugin,
 })
@@ -135,19 +133,19 @@ const processTransfersInBackground = async () => {
         const asset = assetStore.popRandomAsset();
 
         if (!asset) {
-          console.error(`No assets found for account: ${DROP_WALLET_NAME}`);
+          console.error(`No assets found for account: ${process.env.DROP_WALLET_NAME}`);
           continue;
         }
 
         transfer.assetId = asset.asset_id;
-        transfer.sender = DROP_WALLET_NAME;
+        transfer.sender = process.env.DROP_WALLET_NAME as string;
 
         actions.push({
             account: 'atomicassets',
             name: 'transfer',
             authorization: [session.permissionLevel],
             data: {
-              from: DROP_WALLET_NAME,
+              from: process.env.DROP_WALLET_NAME,
               to: receiver,
               asset_ids: [asset.asset_id],
               memo: memo,
@@ -227,7 +225,7 @@ app.post('/transfer', async (req: Request, res: Response) => {
 
   try {    
     const savedTransfers = await transferRepository.save(filteredTransfers.map((transfer: any) => ({
-      sender: DROP_WALLET_NAME,
+      sender: process.env.DROP_WALLET_NAME,
       assetId: "",
       receiver: transfer.receiver,
       memo: transfer.memo,
@@ -332,7 +330,7 @@ app.get('/transfers', async (req: Request, res: Response) => {
     }
   });
 
-const port = 3000;
+const port = 3091;
 app.listen(port, () => {
   console.log(`Drops API is running on http://localhost:${port}`);
 });
