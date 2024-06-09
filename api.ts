@@ -57,7 +57,7 @@ type AllowedApplication = {
 
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host: 'localhost',
+  host: '127.0.0.1',
   port: 5433,
   username: 'postgres',
   password: 'postgres',
@@ -241,6 +241,38 @@ app.post('/transfer', async (req: Request, res: Response) => {
     res.json({ message: 'Transfers added to the queue', transferIds });
   } catch (error) {
     console.error('Error saving transfers:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.delete('/transfer/:id', async (req: Request, res: Response) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+      return res.status(401).json({ error: 'Authorization header is missing' });
+  }
+
+  if (!allowedApplicationsAuthMap.includes(authHeader)) {
+      console.log('unauthorized request:', req.body);
+      return res.status(403).json({ error: 'Unauthorized application' });
+  }
+
+  const application = allowedApplications.filter(app => app.privateKey === req.headers['authorization'])[0];
+  const transferId = req.params.id;
+
+  if (!application){
+    return res.status(400).json({ error: 'Not authed or authed for wrong application' });
+  }
+
+  try {
+    const transferRepository = AppDataSource.getRepository(Transfer);
+    const transfer = await transferRepository.findOneBy({ id: transferId, application: application.name  });
+    if (!transfer) {
+      return res.status(404).json({ error: 'Transfer not found' });
+    }
+
+    const result = await transferRepository.delete({ id: transferId, application: application.name })
+  } catch (error) {
+    console.error('Error deleting transfer:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
