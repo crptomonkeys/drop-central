@@ -270,7 +270,8 @@ app.delete('/transfer/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Transfer not found' });
     }
 
-    const result = await transferRepository.delete({ id: transferId, application: application.name })
+    const result = await transferRepository.delete({ id: transferId, application: application.name });
+    res.status(400).json({ success: 'True', id: transferId })
   } catch (error) {
     console.error('Error deleting transfer:', error);
     res.status(500).json({ error: 'Internal Server Error' });
