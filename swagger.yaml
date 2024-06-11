@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: cryptomonKeys drops API
+  description: API by CM for everybody to drop some cryptomonKeys, woooop 
+  version: 1.0.19
+servers:
+  - url: https://drops.cryptomonkeys.cc
+  - url: http://localhost:3091
+components:
+  schemas:
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: string
+        sender:
+          type: string
+        receiver:
+          type: string
+        assetId:
+          type: string
+        memo:
+          type: string
+        application:
+          type: string
+        status:
+          type: string
+          default: "Pending"
+        time:
+          type: string
+        chainTxId:
+          type: string
+    TransferInput:
+      type: object
+      properties:
+        receiver:
+          type: string
+        memo:
+          type: string
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+paths:
+  /transfer:
+    post:
+      summary: Add transfers to the queue
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransferInput'
+      responses:
+        '200':
+          description: Successfully added transfers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  transferIds:
+                    type: array
+                    items:
+                      type: string
+  /transfer/{id}:
+    delete:
+      summary: Delete a transfer by ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully deleted transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  id:
+                    type: string
+    get:
+      summary: Get transfer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved transfer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+  /transfers:
+    get:
+      summary: Get all transfers with optional filters
+      parameters:
+        - name: application
+          in: query
+          schema:
+            type: string
+        - name: receiver
+          in: query
+          schema:
+            type: string
+        - name: sender
+          in: query
+          schema:
+            type: string
+        - name: memo
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Successfully retrieved transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transfer'
+

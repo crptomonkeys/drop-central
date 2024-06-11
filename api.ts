@@ -5,6 +5,8 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv'; 
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { AssetStore } from './util/atomicassetsStore';
@@ -13,8 +15,12 @@ import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 
 dotenv.config();
 
+const swaggerDocument = YAML.load('./swagger.yaml');
+
 const app = express();
 app.use(bodyParser.json());
+app.use('/static', express.static('public'));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 @Entity()
 class Transfer {
@@ -329,6 +335,15 @@ app.get('/transfers', async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.resolve(__dirname, 'templates/landing.html'));
+});
+
+app.get('/usage', (req: Request, res: Response) => {
+  res.sendFile(path.resolve(__dirname, 'templates/usage.html'));
+});
+  
 
 const port = 3091;
 app.listen(port, () => {

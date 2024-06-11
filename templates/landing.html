@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cryptomonKeys drops API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://connect.cryptomonkeys.cc/static/images/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mui/material@5.4.2/dist/material.min.css" rel="stylesheet">
+  <style>
+    /* Global styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Container styles */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header styles */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      color: #4caf50;
+      margin-bottom: 10px;
+    }
+
+    /* Button styles */
+    .big-button {
+      display: block;
+      width: 60%;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    .big-button:hover {
+      background-color: #388e3c;
+    }
+
+    /* Section styles */
+    .section {
+      margin-bottom: 40px;
+    }
+
+    /* Stats section styles */
+    .stats-section {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1 1 calc(33.33% - 20px);
+      margin: 10px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: scale(1.05);
+    }
+
+    .stat-card h3 {
+      margin: 0;
+      font-size: 2em;
+      color: #4caf50;
+    }
+
+    .stat-card p {
+      margin: 10px 0 0;
+      font-size: 1.2em;
+      color: #666;
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    /* Footer styles */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #4caf50;
+      color: #fff;
+      margin-top: 40px;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .big-button {
+        margin-top: 10px;
+      }
+
+      .stats-section {
+        justify-content: center;
+      }
+
+      .stat-card {
+        flex: 1 1 calc(50% - 20px);
+      }
+    }
+    /* Media Query for Mobile */
+    
+    /* Filter styles */
+    .search-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .search-bar input, .search-bar select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-right: 10px;
+      flex: 1;
+    }
+    .search-bar button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+      flex: 0 1 auto;
+    }
+    .search-bar button:hover {
+      background-color: #388e3c;
+    }
+    @media (max-width: 870px) {
+      .search-bar {
+        flex-direction: column;
+      }
+      .search-bar input, .search-bar select, .search-bar button {
+        width: 100%;
+      }
+    }
+    .banana-container {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      
+    }
+    .banana {
+      width: 50px;
+      height: 50px;
+      animation:  moveRight 5s ease-in infinite, 
+                  moveLeft 5s alternate infinite,
+                  bounceAndMove .5s 10s alternate infinite,
+                  moveRight 5s 11s ease-in infinite, 
+                  moveLeft 5s 11s alternate infinite;
+      
+    }
+    @keyframes bounceAndMove {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+
+@keyframes moveRight {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes moveLeft {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-20px);
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 70px;">cryptomonKeys drops API</h1>
+      <p style="font-size: 1.2rem;">A service from a community for communities. Enhance your project and include cryptomonKey assets as a gamification element. Explore the documentation below and apply for your API key today <a href="https://chat.cryptomonkeys.cc" target="_blank" style="text-decoration: none; color: #4caf50;">here</a>!</p>
+    </div>
+    <div class="banana-container">
+      <img src="/static/banana.png" alt="Banana" class="banana">
+    </div>
+
+    <!-- Buttons Section -->
+    <div class="section" style="display: flex; flex-direction: column; align-items: center;">
+      <a href="/docs" class="big-button">API Documentation</a>
+      <a href="/usage" class="big-button">Usage Guide</a>
+      <a href="https://chat.cryptomonkeys.cc" target="_blank" class="big-button">Get your API key</a>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="section">
+      <h2>Statistics</h2>
+      <div class="stats-section">
+        <div class="stat-card">
+          <h3 id="totalTransfers">0</h3>
+          <p>Total Drops</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="completedTransfers">0</h3>
+          <p>Completed Drops</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="pendingTransfers">0</h3>
+          <p>Pending Drops</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transfer Records Section -->
+    <div class="section">
+      <h2>Search for drops</h2>
+      <div class="search-bar">
+        <input type="text" id="application" placeholder="Application">
+        <input type="text" id="receiver" placeholder="Receiver">
+        <input type="text" id="memo" placeholder="Memo">
+        <select id="status">
+          <option value="">Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <button onclick="fetchTransfers()">Search</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Application</th>
+            <th>Receiver</th>
+            <th>Memo</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>TX</th>
+          </tr>
+        </thead>
+        <tbody id="transferTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2024 by cryptomonKeys
+  </footer>
+
+  <!-- Script Section -->
+  <script>
+    async function fetchTransfers() {
+      const application = document.getElementById('application').value;
+      const receiver = document.getElementById('receiver').value;
+      const memo = document.getElementById('memo').value;
+      const status = document.getElementById('status').value;
+
+      const query = new URLSearchParams({
+        application, receiver,  memo, status
+      });
+
+      const response = await fetch('/transfers?' + query.toString());
+      const transfers = await response.json();
+
+      const transferTable = document.getElementById('transferTable');
+      transferTable.innerHTML = '';
+
+      transfers.forEach(transfer => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${transfer.application}</td>
+          <td><a href="https://atomichub.io/profile/wax-mainnet/${transfer.receiver}" target="_blank">${transfer.receiver}</a></td>
+          <td>${transfer.memo}</td>
+          <td>${transfer.status}</td>
+          <td>${new Date(transfer.time).toLocaleString()}</td>
+          <td><a href="https://waxblock.io/transaction/${transfer.chainTxId}" target="_blank">Explorer</a></td>
+        `;
+        transferTable.appendChild(row);
+      });
+
+      // Update stats section
+      const totalTransfers = transfers.length;
+      const completedTransfers = transfers.filter(t => t.status === 'Completed').length;
+      const pendingTransfers = transfers.filter(t => t.status === 'Pending').length;
+
+      document.getElementById('totalTransfers').innerText = totalTransfers;
+      document.getElementById('completedTransfers').innerText = completedTransfers;
+      document.getElementById('pendingTransfers').innerText = pendingTransfers;
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchTransfers);
+  </script>
+</body>
+</html>

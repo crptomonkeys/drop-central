@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cryptomonKeys drops API usage guide</title>
+    <link rel="icon" href="https://connect.cryptomonkeys.cc/static/images/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      header {
+        background-color: #4caf50;
+        color: white;
+        padding: 1em 0;
+        text-align: center;
+      }
+      button {
+        background: none;
+        border: none;
+        color: black;
+        font-size: 1.5em;
+        cursor: pointer;
+      }
+      .container {
+        max-width: 900px;
+        margin: 2em auto;
+        padding: 1em;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #333;
+      }
+      code {
+        background-color: #f9f9f9;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+      }
+      pre {
+        background-color: #f9f9f9;
+        padding: 1em;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      .example {
+        background-color: #e7f7e7;
+        padding: 1em;
+        border-left: 5px solid #4caf50;
+        margin: 1em 0;
+        border-radius: 8px;
+      }
+      .example code {
+        background-color: transparent;
+      }
+      footer {
+        text-align: center;
+        padding: 2em 0;
+        background-color: #4caf50;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button onclick="window.location.href='/'"><i class="fas fa-home"></i></button>
+      <h1>cryptomonKeys drops API usage guide</h1>
+    </header>
+    <div class="container">
+      <h1>Introduction</h1>
+      <p>
+        Welcome to the cryptomonKeys drops API. This API allows you to manage and automate the transfer of cryptomonKeys NFTs. It is designed to facilitate the integration of cryptomonKeys assets into various applications, bots, or games. With this API, you can programmatically drop cryptomonKeys NFTs, enhancing your project with unique and engaging digital assets. Below, you will find the available
+        endpoints, their descriptions, and examples of how to use them effectively.
+      </p>
+
+      <div class="toc">
+        <h1>Table of Contents</h1>
+        <ul>
+            <li><a href="#api-key">Obtaining an API Key</a></li>
+            <li>
+                <a href="#clients">Clients</a>
+                <ul>
+                    <li><a href="#python-client">Python Client</a></li>
+                    <li><a href="#typescript-client">TypeScript Client</a></li>
+                </ul>
+            </li>
+            <li><a href="#endpoints">Endpoints</a></li>
+        </ul>
+    </div>
+    
+
+      <!-- API Key section -->
+      <h1 id="api-key">Obtaining an API Key</h1>
+      <p>To obtain an API key, please contact us on <strong><a href="https://chat.cryptomonkeys.cc">Discord</a></strong>.</p>
+
+      <!-- Clients section -->
+      <h1 id="clients">Client Usage</h1>
+
+      <h2 id="python-client">Python Client</h2>
+      <p>The Python client enables users to interact with the drops API programmatically using Python, get it from <a href="https://github.com/crptomonkeys/drop-central/blob/main/clients/python/dropClientPy.py" target="_blank">Github</a>.</p>
+      <h3>Initialize the DropsAPIClient</h3>
+      <div class="example">
+        <pre><code>base_url = "http://localhost:3091"
+auth_token = "your_authorization_token"
+
+client = DropsAPIClient(base_url, auth_token)
+</code></pre>
+      </div>
+
+      <h3>Create a drop</h3>
+      <div class="example">
+        <pre><code>transfers = [
+  {
+    "receiver": "example_receiver",
+    "memo": "Test memo",
+  }
+]
+
+create_response = client.create_transfer(transfers)
+print("Create drop Response:", create_response)
+</code></pre>
+      </div>
+
+      <h3>Delete a drop</h3>
+      <div class="example">
+        <pre><code>delete_response = client.delete_transfer(transfer_id)
+print("Delete Transfer Response:", delete_response) 
+</code></pre>
+      </div>
+
+      <h3>query a drop</h3>
+      <div class="example">
+        <pre><code># Get transfer by ID
+transfer_id = create_response['transferIds'][0]
+get_response = client.get_transfer(transfer_id)
+print("Get Transfer Response:", get_response)
+
+# Get all transfers with optional query parameters
+query_params = {'application': 'example_application'}
+get_all_response = client.get_transfers(query_params)
+print("Get All Transfers Response:", get_all_response)
+</code></pre>
+      </div>
+
+      <h2 id="typescript-client">TypeScript Client</h2>
+      <p>The TypeScript client can be found <a href="https://github.com/crptomonkeys/drop-central/blob/main/clients/ts/dropClientJS.ts">here</a></p>
+      <h3>Initialize the TransfersClient</h3>
+      <div class="example">
+        <pre><code>const config = {
+  baseURL: "http://localhost:3091",
+  authKey: "your_authorization_key",
+};
+const client = new TransfersClient(config);
+</code></pre>
+      </div>
+      <h3>Create a drop</h3>
+      <div class="example">
+        <pre><code>const transfers = [
+  {
+    receiver: "example_receiver",
+    memo: "Test memo",
+  }
+];
+const transferIds = await client.postTransfer(transfers);
+console.log('Posted transfers with IDs:', transferIds);
+</code></pre>
+      </div>
+      <h3>Query a drop</h3>
+      <div class="example">
+        <pre><code>for (const transferId of transferIds) {
+  const transfer = await client.getTransferById(transferId);
+  console.log(`Transfer ${transferId}:`, transfer);
+}
+</code></pre>
+      </div>
+      <h3>Get all transfers with optional query parameters</h3>
+      <div class="example">
+        <pre><code>const filteredTransfers = await client.getTransfers({ application: applicationName, sort_by_time: 'desc' });
+console.log('Filtered transfers:', filteredTransfers);
+</code></pre>
+      </div>
+      <h1 id="endpoints">Endpoints</h1>
+
+      <h3>1. Add Transfers to the Queue</h3>
+      <p><code>POST /transfer</code></p>
+      <p>Adds one or more transfers to the processing queue. Each transfer must include a receiver and a memo.</p>
+      <h4>Request Headers</h4>
+      <pre><code>Authorization: your-application-private-key</code></pre>
+      <h4>Request Body</h4>
+      <pre><code>[
+  {
+    "receiver": "receiverAccount",
+    "memo": "This is a transfer memo"
+  }
+]</code></pre>
+      <h4>Example</h4>
+      <div class="example">
+        <code> curl -X POST http://localhost:3091/transfer \ -H "Authorization: your-application-private-key" \ -H "Content-Type: application/json" \ -d '[ { "receiver": "receiverAccount", "memo": "This is a transfer memo" } ]' </code>
+      </div>
+
+      <h3>2. Delete a Transfer by ID</h3>
+      <p><code>DELETE /transfer/{id}</code></p>
+      <p>Deletes a transfer from the queue by its ID. Only pending transfers can be deleted.</p>
+      <h4>Request Headers</h4>
+      <pre><code>Authorization: your-application-private-key</code></pre>
+      <h4>Example</h4>
+      <div class="example">
+        <code> curl -X DELETE http://localhost:3091/transfer/transferId \ -H "Authorization: your-application-private-key" </code>
+      </div>
+
+      <h3>3. Get Transfer by ID</h3>
+      <p><code>GET /transfer/{id}</code></p>
+      <p>Retrieves a transfer by its ID.</p>
+      <h4>Example</h4>
+      <div class="example">
+        <code> curl -X GET http://localhost:3091/transfer/transferId </code>
+      </div>
+
+      <h3>4. Get All Transfers</h3>
+      <p><code>GET /transfers</code></p>
+      <p>Retrieves all transfers with optional filters such as application, receiver, sender, memo, status, and sort.</p>
+      <h4>Example</h4>
+      <div class="example">
+        <code> curl -X GET "http://localhost:3091/transfers?application=appName&status=Pending" </code>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; 2024 cryptomonKeys</p>
+    </footer>
+  </body>
+</html>
