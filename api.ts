@@ -343,6 +343,10 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/usage', (req: Request, res: Response) => {
   res.sendFile(path.resolve(__dirname, 'templates/usage.html'));
 });
+
+app.get('/view', (req: Request, res: Response) => {
+  res.sendFile(path.resolve(__dirname, 'templates/single_drop_view.html'));
+});
   
 
 const port = 3091;
