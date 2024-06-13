@@ -300,41 +300,49 @@ app.get('/transfer/:id', async (req: Request, res: Response) => {
 });
 
 app.get('/transfers', async (req: Request, res: Response) => {
-    const transferRepository = AppDataSource.getRepository(Transfer);
-    
-    const { application, receiver, sender, memo, status, sort } = req.query;
+  const transferRepository = AppDataSource.getRepository(Transfer);
   
-    try {
-      const queryBuilder = transferRepository.createQueryBuilder('transfer');
-  
-      if (application) {
-        queryBuilder.andWhere('transfer.application = :application', { application });
-      }
-      if (receiver) {
-        queryBuilder.andWhere('transfer.receiver = :receiver', { receiver });
-      }
-      if (sender) {
-        queryBuilder.andWhere('transfer.sender = :sender', { sender });
-      }
-      if (memo) {
-        queryBuilder.andWhere('transfer.memo ILIKE :memo', { memo: `%${memo}%` });
-      }
-      if (status) {
-        queryBuilder.andWhere('transfer.status = :status', { status });
-      }
-  
-      if (sort === 'asc' || sort === 'desc') {
-        queryBuilder.orderBy('transfer.time', sort.toUpperCase() as 'ASC' | 'DESC');
-      }
-  
-      const transfers = await queryBuilder.getMany();
-  
-      res.json(transfers);
-    } catch (error) {
-      console.error('Error fetching transfers:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+  const { application, receiver, sender, memo, status, sort, limit, skip } = req.query;
+
+  try {
+    const queryBuilder = transferRepository.createQueryBuilder('transfer');
+
+    if (application) {
+      queryBuilder.andWhere('transfer.application = :application', { application });
     }
-  });
+    if (receiver) {
+      queryBuilder.andWhere('transfer.receiver = :receiver', { receiver });
+    }
+    if (sender) {
+      queryBuilder.andWhere('transfer.sender = :sender', { sender });
+    }
+    if (memo) {
+      queryBuilder.andWhere('transfer.memo ILIKE :memo', { memo: `%${memo}%` });
+    }
+    if (status) {
+      queryBuilder.andWhere('transfer.status = :status', { status });
+    }
+
+    if (sort === 'asc' || sort === 'desc') {
+      queryBuilder.orderBy('transfer.time', sort.toUpperCase() as 'ASC' | 'DESC');
+    }
+
+    const maxLimit = 10000; 
+    const parsedLimit = parseInt(limit as string, 10) || maxLimit;
+    const effectiveLimit = Math.min(parsedLimit, maxLimit);
+    const parsedSkip = parseInt(skip as string, 10) || 0;
+
+    queryBuilder.take(effectiveLimit);
+    queryBuilder.skip(parsedSkip);
+
+    const transfers = await queryBuilder.getMany();
+
+    res.json(transfers);
+  } catch (error) {
+    console.error('Error fetching transfers:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.resolve(__dirname, 'templates/landing.html'));

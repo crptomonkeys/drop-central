@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Drop</title>
+    <title>Search Drop</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -195,14 +195,14 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">View Drop</h1>
+        <h1 class="text-center">Search CM drop</h1>
         <div class="search-section">
             <div class="form-group">
                 <label for="dropId">Drop ID</label>
-                <input type="text" class="form-control" id="dropId" placeholder="Enter Drop ID">
+                <input type="text" class="form-control" id="dropId" placeholder="Enter drop ID">
             </div>
             <div class="form-group">
-                <button class="btn btn-primary" onclick="fetchDrop()">View Drop</button>
+                <button class="btn btn-primary" onclick="fetchDrop()">Search drop</button>
             </div>
             <div class="error" id="error"></div>
         </div>
@@ -265,7 +265,7 @@
             errorElement.textContent = '';
 
             try {
-                const response = await fetch(`http://127.0.0.1:3091/transfer/${dropId}`);
+                const response = await fetch(`/transfer/${dropId}`);
                 if (!response.ok) {
                     throw new Error('Drop not found');
                 }

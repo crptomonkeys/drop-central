@@ -228,6 +228,34 @@
     transform: translateX(-20px);
   }
 }
+.status {
+            display: flex;
+            align-items: center;
+        }
+
+        .status span {
+            margin-left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .status-symbol {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .status-pending {
+            background: orange;
+        }
+
+        .status-completed {
+            background: green;
+        }
+
+        .status-failed {
+            background: red;
+        }
 
 
   </style>
@@ -308,45 +336,52 @@
   <!-- Script Section -->
   <script>
     async function fetchTransfers() {
-      const application = document.getElementById('application').value;
-      const receiver = document.getElementById('receiver').value;
-      const memo = document.getElementById('memo').value;
-      const status = document.getElementById('status').value;
+  const application = document.getElementById('application').value;
+  const receiver = document.getElementById('receiver').value;
+  const memo = document.getElementById('memo').value;
+  const status = document.getElementById('status').value;
+  const sort = 'desc';
 
-      const query = new URLSearchParams({
-        application, receiver,  memo, status
-      });
+  const query = new URLSearchParams({
+    application, receiver, memo, status, sort
+  });
 
-      const response = await fetch('/transfers?' + query.toString());
-      const transfers = await response.json();
+  const response = await fetch('/transfers?' + query.toString());
+  const transfers = await response.json();
 
-      const transferTable = document.getElementById('transferTable');
-      transferTable.innerHTML = '';
+  const transferTable = document.getElementById('transferTable');
+  transferTable.innerHTML = '';
 
-      transfers.forEach(transfer => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${transfer.application}</td>
-          <td><a href="https://atomichub.io/profile/wax-mainnet/${transfer.receiver}" target="_blank">${transfer.receiver}</a></td>
-          <td>${transfer.memo}</td>
-          <td>${transfer.status}</td>
-          <td>${new Date(transfer.time).toLocaleString()}</td>
-          <td><a href="https://waxblock.io/transaction/${transfer.chainTxId}" target="_blank">Explorer</a></td>
-        `;
-        transferTable.appendChild(row);
-      });
-
-      // Update stats section
-      const totalTransfers = transfers.length;
-      const completedTransfers = transfers.filter(t => t.status === 'Completed').length;
-      const pendingTransfers = transfers.filter(t => t.status === 'Pending').length;
-
-      document.getElementById('totalTransfers').innerText = totalTransfers;
-      document.getElementById('completedTransfers').innerText = completedTransfers;
-      document.getElementById('pendingTransfers').innerText = pendingTransfers;
+  // Display only the first 200 transfers
+  transfers.slice(0, 200).forEach(transfer => {
+    const row = document.createElement('tr');
+    let statusSymbol = 'status-pending';
+    if (transfer.status === 'Completed') {
+      statusSymbol = 'status-completed';
     }
+    row.innerHTML = `
+      <td>${transfer.application}</td>
+      <td><a href="https://atomichub.io/profile/wax-mainnet/${transfer.receiver}" target="_blank">${transfer.receiver}</a></td>
+      <td>${transfer.memo}</td>
+      <td><div class="status-symbol ${statusSymbol}"></div></td>
+      <td>${new Date(transfer.time).toLocaleString()}</td>
+      <td><a href="https://waxblock.io/transaction/${transfer.chainTxId}" target="_blank">Explorer</a></td>
+    `;
+    transferTable.appendChild(row);
+  });
 
-    document.addEventListener('DOMContentLoaded', fetchTransfers);
+  // Update stats section
+  const totalTransfers = transfers.length;
+  const completedTransfers = transfers.filter(t => t.status === 'Completed').length;
+  const pendingTransfers = transfers.filter(t => t.status === 'Pending').length;
+
+  document.getElementById('totalTransfers').innerText = totalTransfers;
+  document.getElementById('completedTransfers').innerText = completedTransfers;
+  document.getElementById('pendingTransfers').innerText = pendingTransfers;
+}
+
+document.addEventListener('DOMContentLoaded', fetchTransfers);
+
   </script>
 </body>
 </html>
