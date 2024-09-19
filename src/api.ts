@@ -17,13 +17,13 @@ dotenv.config()
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
-const app = express();
+export const app = express();
 app.use(bodyParser.json());
 app.use('/static', express.static('public'));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 @Entity()
-class Transfer {
+export class Transfer {
   @PrimaryGeneratedColumn('uuid')
     id!: string;
 
@@ -62,7 +62,7 @@ type AllowedApplication = {
     maxDropCount: number;
 };
 
-const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: 'postgres',
   host: '127.0.0.1',
   port: 5433,
