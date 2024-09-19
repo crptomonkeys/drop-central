@@ -13,6 +13,8 @@ components:
       properties:
         id:
           type: string
+        jobId:
+          type: string
         sender:
           type: string
         receiver:
@@ -117,6 +119,10 @@ paths:
           schema:
             type: string
         - name: receiver
+          in: query
+          schema:
+            type: string
+        - name: jobId
           in: query
           schema:
             type: string

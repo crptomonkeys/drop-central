@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Drop</title>
+    <title>Search Job/Drop</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -14,7 +14,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding-bottom: 100px; /* Space for footer */
+            padding-bottom: 100px;
         }
 
         .container {
@@ -30,14 +30,14 @@
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
-            color: #28a745; /* Green color */
+            color: #28a745;
             text-align: center;
         }
 
         .form-group button {
             width: 100%;
             border-radius: 20px;
-            background-color: #ffc107; /* Yellow color */
+            background-color: #ffc107;
             border: none;
             color: white;
             padding: 10px;
@@ -54,9 +54,30 @@
             margin-bottom: 20px;
         }
 
-        .drop-details {
+        .job-details, .drop-details {
             display: none;
             text-align: left;
+        }
+
+        .job-info {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .job-info h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ffc107;
+        }
+
+        .form-group select {
+            width: 100%;
+            border-radius: 20px;
+            padding: 10px;
+            margin-top: 10px;
         }
 
         .drop-box {
@@ -66,17 +87,6 @@
             margin-bottom: 20px;
             background: #fafafa;
             position: relative;
-        }
-
-        .drop-box h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: #ffc107; /* Yellow color */
-        }
-
-        .drop-box p {
-            margin: 0;
-            font-size: 16px;
         }
 
         .drop-box .box-btn {
@@ -94,22 +104,17 @@
             background: #218838;
         }
 
+        .drop-box h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ffc107;
+        }
+
         .status-tx {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-        }
-
-        .status span {
-            margin-left: 10px;
-            font-size: 16px;
-            font-weight: bold;
         }
 
         .status-symbol {
@@ -133,7 +138,7 @@
         .tx-btn a {
             text-decoration: none;
             color: white;
-            background: #28a745; /* Green color */
+            background: #28a745;
             padding: 10px 15px;
             border-radius: 5px;
             display: inline-block;
@@ -155,15 +160,11 @@
             margin-top: 10px;
         }
 
-        .form-group input {
-            border-radius: 20px;
-        }
-
         .footer {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: #28a745; /* Green color */
+            background: #28a745;
             color: white;
             text-align: center;
             padding: 10px 0;
@@ -195,17 +196,33 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Search CM drop</h1>
+        <h1 class="text-center">Search CM Job/Drop</h1>
         <div class="search-section">
             <div class="form-group">
-                <label for="dropId">Drop ID</label>
-                <input type="text" class="form-control" id="dropId" placeholder="Enter drop ID">
+                <label for="jobOrDropId">Job/Drop ID</label>
+                <input type="text" class="form-control" id="jobOrDropId" placeholder="Enter job or drop ID">
             </div>
             <div class="form-group">
-                <button class="btn btn-primary" onclick="fetchDrop()">Search drop</button>
+                <button class="btn btn-primary" onclick="fetchData()">Search</button>
             </div>
             <div class="error" id="error"></div>
         </div>
+
+        <div class="job-details" id="jobDetails">
+            <div class="job-info">
+                <h2>Job Information</h2>
+                <p><strong>Job ID:</strong> <span id="jobIdInfo"></span></p>
+                <p><strong>Application:</strong> <span id="applicationInfo"></span></p>
+            </div>
+
+            <div class="form-group">
+                <label for="dropSelect">Select a drop:</label>
+                <select id="dropSelect" class="form-control" onchange="displaySelectedDrop()">
+                    <option value="" disabled selected>Select a drop</option>
+                </select>
+            </div>
+        </div>
+
         <div class="drop-details" id="dropDetails">
             <div class="drop-box">
                 <h2>Receiver</h2>
@@ -243,45 +260,92 @@
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const urlParams = new URLSearchParams(window.location.search);
-            const transferId = urlParams.get('transfer-id');
-            
-            if (transferId) {
-                document.getElementById('dropId').value = transferId;
-                fetchDrop();
+            const jobOrDropId = urlParams.get('id');
+
+            if (jobOrDropId) {
+                document.getElementById('jobOrDropId').value = jobOrDropId;
+                fetchData();
             }
         });
 
-        async function fetchDrop() {
-            const dropId = document.getElementById('dropId').value;
+        let dropData = [];
+
+        async function fetchData() {
+            const inputId = document.getElementById('jobOrDropId').value.trim();
             const dropDetails = document.getElementById('dropDetails');
+            const jobDetails = document.getElementById('jobDetails');
+            const dropSelect = document.getElementById('dropSelect');
             const errorElement = document.getElementById('error');
 
-            if (!dropId) {
-                errorElement.textContent = 'Please enter a Drop ID';
+            if (!inputId) {
+                errorElement.textContent = 'Please enter a Job or Drop ID';
                 return;
             }
 
             dropDetails.style.display = 'none';
+            jobDetails.style.display = 'none';
             errorElement.textContent = '';
+            dropSelect.innerHTML = '<option value="" disabled selected>Select a drop</option>'; // Reset dropdown
 
             try {
-                const response = await fetch(`/transfer/${dropId}`);
-                if (!response.ok) {
-                    throw new Error('Drop not found');
+                let response;
+                if (inputId.startsWith('job_')) {
+                    response = await fetch(`/transfers?jobId=${inputId}`);
+                } else {
+                    response = await fetch(`/transfers?id=${inputId}`);
                 }
+                console.log(response.content)
+
+                if (!response.ok) {
+                    throw new Error('ID not found');
+                }
+
                 const data = await response.json();
 
-                document.getElementById('receiver').textContent = data.receiver;
-                const receiverUrl = `https://waxblock.io/account/${data.receiver}`;
-                document.getElementById('receiverLink').href = receiverUrl;
+                console.log(data)
+                
+                if (data.length > 1) {
+                    document.getElementById('jobIdInfo').textContent = data[0].jobId;
+                    document.getElementById('applicationInfo').textContent = data[0].application;
 
-                document.getElementById('memo').textContent = data.memo;
+                    dropData = data;
+                    dropData.forEach((drop, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `Drop ${index + 1} - Receiver: ${drop.receiver}`;
+                        dropSelect.appendChild(option);
+                    });
 
-                document.getElementById('assetId').textContent = data.assetId;
-                const assetUrl = `https://wax.atomichub.io/explorer/asset/${data.assetId}`;
-                document.getElementById('assetLink').href = assetUrl;
+                    jobDetails.style.display = 'block';
 
-                const status = data.status.toLowerCase();
+                } else {
+                    dropData = data;
+                    displaySelectedDrop(0);
+                }
+            } catch (error) {
+                errorElement.textContent = error.message;
+            }
+        }
+
+        function displaySelectedDrop(selectedIndex) {
+            const dropDetails = document.getElementById('dropDetails');
+            if (selectedIndex === undefined) {
+                selectedIndex = document.getElementById('dropSelect').value;
+            }
+
+            if (dropData[selectedIndex]) {
+                const selectedDrop = dropData[selectedIndex];
+                console.log(selectedDrop)
+
+                document.getElementById('receiver').textContent = selectedDrop.receiver;
+                document.getElementById('receiverLink').href = `https://waxblock.io/account/${selectedDrop.receiver}`;
+
+                document.getElementById('memo').textContent = selectedDrop.memo;
+
+                document.getElementById('assetId').textContent = selectedDrop.assetId;
+                document.getElementById('assetLink').href = `https://wax.atomichub.io/explorer/asset/${selectedDrop.assetId}`;
+
+                const status = selectedDrop.status.toLowerCase();
                 const statusSymbol = document.getElementById('statusSymbol');
                 statusSymbol.classList.remove('status-pending', 'status-completed', 'status-failed');
                 if (status === 'completed') {
@@ -291,18 +355,17 @@
                 } else {
                     statusSymbol.classList.add('status-failed');
                 }
-                document.getElementById('status').textContent = data.status;
 
-                const txUrl = `https://waxblock.io/transaction/${data.chainTxId}`;
-                document.getElementById('chainTxId').href = txUrl;
+                document.getElementById('status').textContent = selectedDrop.status;
 
-                document.getElementById('time').textContent = new Date(data.time).toLocaleString();
+                document.getElementById('chainTxId').href = `https://waxblock.io/transaction/${selectedDrop.chainTxId}`;
+
+                document.getElementById('time').textContent = new Date(selectedDrop.time).toLocaleString();
 
                 dropDetails.style.display = 'block';
-            } catch (error) {
-                errorElement.textContent = error.message;
             }
         }
     </script>
 </body>
 </html>
+

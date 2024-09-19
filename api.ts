@@ -28,6 +28,9 @@ class Transfer {
     id!: string;
 
   @Column('text')
+    jobId!: string;
+
+  @Column('text')
     sender!: string;
 
   @Column('text')
@@ -229,8 +232,12 @@ app.post('/transfer', async (req: Request, res: Response) => {
     return true;
   });
 
+  const randomPart = Math.floor(Math.random() * 1e9).toString(16);
+  const timestampPart = Date.now().toString(16);
+
   try {    
     const savedTransfers = await transferRepository.save(filteredTransfers.map((transfer: any) => ({
+      jobId: `job_${timestampPart}_${randomPart}`,
       sender: process.env.DROP_WALLET_NAME,
       assetId: "",
       receiver: transfer.receiver,
@@ -242,7 +249,7 @@ app.post('/transfer', async (req: Request, res: Response) => {
 
     const transferIds = savedTransfers.map(transfer => transfer.id);
 
-    res.json({ message: 'Transfers added to the queue', transferIds });
+    res.json({ message: 'Transfers added to the queue', transferIds: transferIds, jobId: `job_${timestampPart}_${randomPart}`});
   } catch (error) {
     console.error('Error saving transfers:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -269,12 +276,12 @@ app.delete('/transfer/:id', async (req: Request, res: Response) => {
 
   try {
     const transferRepository = AppDataSource.getRepository(Transfer);
-    const transfer = await transferRepository.findOneBy({ id: transferId, application: application.name, status: "Pending"  });
+    const transfer = await transferRepository.findOneBy({ id: transferId, application: application.name, status: "Pending" });
     if (!transfer) {
-      return res.status(404).json({ error: 'Transfer not found' });
+      return res.status(404).json({ error: 'Transfer not found or already processed' });
     }
 
-    const result = await transferRepository.delete({ id: transferId, application: application.name });
+    const result = await transferRepository.delete({ id: transferId, application: application.name, status: "Pending" });
     res.status(200).json({ success: 'True', id: transferId })
   } catch (error) {
     console.error('Error deleting transfer:', error);
@@ -302,13 +309,19 @@ app.get('/transfer/:id', async (req: Request, res: Response) => {
 app.get('/transfers', async (req: Request, res: Response) => {
   const transferRepository = AppDataSource.getRepository(Transfer);
   
-  const { application, receiver, sender, memo, status, sort, limit, skip } = req.query;
+  const { application, receiver, sender, memo, status, sort, limit, skip, jobId, id } = req.query;
 
   try {
     const queryBuilder = transferRepository.createQueryBuilder('transfer');
 
     if (application) {
       queryBuilder.andWhere('transfer.application = :application', { application });
+    }
+    if (jobId) {
+      queryBuilder.andWhere('transfer.jobId = :jobId', { jobId });
+    }
+    if (id) {
+      queryBuilder.andWhere('transfer.id = :id', { id });
     }
     if (receiver) {
       queryBuilder.andWhere('transfer.receiver = :receiver', { receiver });
