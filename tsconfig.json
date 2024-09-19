@@ -18,9 +18,8 @@
       "checkJs": true,
       /* Bundled projects */
       "lib": ["dom", "dom.iterable", "ES2022"],
-      "noEmit": true,
       "module": "ESNext",
-      "moduleResolution": "node",
+      "moduleResolution": "node16",
       "jsx": "preserve",
       "plugins": [{ "name": "next" }],
       "incremental": true,
@@ -29,17 +28,12 @@
       "paths": {
         "@/*": ["./*"]
       },
+      "outDir": "./dist",
       /* Needed for ts-node */
       "typeRoots": ["**/*.d.ts"]
     },
     "include": [
-      ".eslintrc.cjs",
-      "next-env.d.ts",
-      "**/*.ts",
-      "**/*.tsx",
-      "**/*.cjs",
-      "**/*.js",
-      ".next/types/**/*.ts"
+      "src"
     ],
     "exclude": ["node_modules"],
     "ts-node": {

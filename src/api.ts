@@ -9,11 +9,11 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { AssetStore } from './util/atomicassetsStore';
+import { AssetStore } from './util/atomicassetsStore.js';
 import { Session } from '@wharfkit/session';
 import { WalletPluginPrivateKey } from "@wharfkit/wallet-plugin-privatekey"
 
-dotenv.config();
+dotenv.config()
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
@@ -84,7 +84,7 @@ AppDataSource.initialize()
 const assetStore = new AssetStore(process.env.DROP_WALLET_NAME as string, ['https://aa.wax.blacklusion.io', 'https://atomic3.hivebp.io', 'https://atomic2.hivebp.io', 'https://aa.neftyblocks.com', 'https://aa-wax-public1.neftyblocks.com', 'https://aa.dapplica.io', 'https://api.atomic.greeneosio.com', 'https://wax-atomic-api.eosphere.io', 'https://wax-aa.eosdac.io', 'https://atomic.hivebp.io', 'https://atomic.3dkrender.com', 'https://wax.eosusa.io', 'https://atomic-wax-mainnet.wecan.dev', 'https://wax-atomic.eosiomadrid.io', 'https://wax.api.atomicassets.io', 'https://atomicassets.ledgerwise.io']);
         
 const allowedApplications: AllowedApplication[] = JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, 'allowedApplications.json'), 'utf8')    
+    fs.readFileSync('./allowedApplications.json', 'utf8')    
 );
 
 const allowedApplicationsMap: Record<string, AllowedApplication> = {};
@@ -358,15 +358,15 @@ app.get('/transfers', async (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  res.sendFile(path.resolve(__dirname, 'templates/landing.html'));
+  res.sendFile('dist/templates/landing.html', { root: '.' });
 });
 
 app.get('/usage', (req: Request, res: Response) => {
-  res.sendFile(path.resolve(__dirname, 'templates/usage.html'));
+  res.sendFile('dist/templates/usage.html', { root: '.' });
 });
 
 app.get('/view', (req: Request, res: Response) => {
-  res.sendFile(path.resolve(__dirname, 'templates/single_drop_view.html'));
+  res.sendFile('dist/templates/single_drop_view.html', { root: '.' });
 });
   
 
