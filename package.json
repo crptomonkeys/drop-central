@@ -9,10 +9,10 @@
   "scripts": {
     "lint": "eslint src/**/*.ts* --fix",
     "prettier": "prettier ./**/*.ts* --config .prettierrc.json --write",
-    "dev": "tsx api.ts",
+    "dev": "tsx src/api.ts",
     "build": "tsc && mkdir dist/templates && cp src/templates/* dist/templates/",
     "start": "node dist/api.js",
-    "wipe": "tsx util/db-wipe.ts",
+    "wipe": "tsx src/util/db-wipe.ts",
     "type-check": "tsc"
   },
   "dependencies": {
