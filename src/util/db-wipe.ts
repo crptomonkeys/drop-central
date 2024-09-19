@@ -1,10 +1,11 @@
-import { Client } from 'pg';
+import pg from "pg";
+const { Client } = pg;
 
 const DB_NAME = 'postgres';
 const DB_USER = 'postgres';
 const DB_PASSWORD = 'postgres';
 const DB_HOST = 'localhost'; // or your database host
-const DB_PORT = 5432; // or your database port
+const DB_PORT = 5433; // or your database port
 
 const client = new Client({
   user: DB_USER,
